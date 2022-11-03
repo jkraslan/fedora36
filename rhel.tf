@@ -54,8 +54,8 @@ data "template_file" "network_config" {
 resource "libvirt_domain" "rhel" {
   count = length(var.vm_machines)
   name = var.vm_machines[count.index]
-  memory = "4096"
-  vcpu = 4
+  memory = "8192"
+  vcpu = 8
 
   cloudinit = "${libvirt_cloudinit_disk.commoninit.id}"
 
