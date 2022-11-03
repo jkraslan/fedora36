@@ -9,20 +9,24 @@ terraform {
 }
 
 provider "libvirt" {
-  uri = "qemu+ssh://root@9.152.91.155/system"
+  uri = "qemu+ssh://root@9.152.56.12/system"
 }
 
 variable "vm_machines" {
   type = list(string)
-  #default = ["fw171", "fw172", "fw173"]
-  default = ["fw172"]
+  default = ["test"]
+}
+
+variable "hostname" {
+  type = string
+  default = "hasox"
 }
 
 resource "libvirt_volume" "rhel" {
-  name   = "${var.vm_machines[count.index]}.qcow2"
+  name   = "${var.vm_machines}.qcow2"
   count  = length(var.vm_machines)
   pool   = "images"
-  source = "http://9.152.91.156/rhel-guest-image-8.4-992.s390x.qcow2"
+  source = "https://ftp.upjs.sk/pub/fedora/linux/releases/36/Cloud/x86_64/images/Fedora-Cloud-Base-36-1.5.x86_64.qcow2"
   format = "qcow2"
 }
 
@@ -45,17 +49,13 @@ data "template_file" "network_config" {
 resource "libvirt_domain" "rhel" {
   count = length(var.vm_machines)
   name = var.vm_machines[count.index]
-  memory = "1024"
-  vcpu = 1
+  memory = "2048"
+  vcpu = 2
 
   cloudinit = "${libvirt_cloudinit_disk.commoninit.id}"
 
- xml {
-    xslt = file("${path.module}/nodes-adjust.xslt")
-  }
-
   network_interface {
-     network_name = "bridged-network"
+     network_name = "default"
   }
 
   console {
@@ -71,7 +71,7 @@ resource "libvirt_domain" "rhel" {
   }
 
   disk {
-       volume_id = libvirt_volume.rhel[count.index].id
+       volume_id = libvirt_volume.rhel.id
   }
   graphics {
     type = "vnc"
