@@ -23,7 +23,7 @@ variable "hostname" {
 }
 
 resource "libvirt_volume" "rhel" {
-  name   = "${var.vm_machines}-original.qcow2"
+  name   = "${var.hostname}.qcow2"
   pool   = "images"
   source = "https://ftp.upjs.sk/pub/fedora/linux/releases/36/Cloud/x86_64/images/Fedora-Cloud-Base-36-1.5.x86_64.qcow2"
   format = "qcow2"
