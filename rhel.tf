@@ -24,10 +24,16 @@ variable "hostname" {
 
 resource "libvirt_volume" "rhel" {
   name   = "${var.vm_machines}.qcow2"
-  count  = length(var.vm_machines)
   pool   = "images"
   source = "https://ftp.upjs.sk/pub/fedora/linux/releases/36/Cloud/x86_64/images/Fedora-Cloud-Base-36-1.5.x86_64.qcow2"
   format = "qcow2"
+}
+
+resource "libvirt_volume" "resized" {
+  name = "${var.hostname}.qcow2"
+  base_volume_id = libvirt_volume.rhel.id
+  pool = "images"
+  size = 50*1024*1024*1024
 }
 
 resource "libvirt_cloudinit_disk" "commoninit" {
@@ -44,7 +50,6 @@ data "template_file" "user_data" {
 data "template_file" "network_config" {
   template = "${file("${path.module}/network_config.cfg")}"
 }
-
 
 resource "libvirt_domain" "rhel" {
   count = length(var.vm_machines)
